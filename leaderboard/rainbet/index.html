@@ -453,18 +453,33 @@ const top3Glows = ['0 0 40px #00FF00', '0 0 40px #00FF00', '0 0 40px #00FF00'];
 function updateCountdown() {
   const el = document.getElementById("countdown");
   const now = new Date();
-  const nextMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1, 0, 0, 0));
-  const target = new Date(nextMonth.getTime() - 60000); // End of current month UTC
+
+  // Figure out the target date (18th at 23:59:59 UTC)
+  let target = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 18, 23, 59, 59));
+
+  // If we've already passed this month's 18th, use next month's 18th
+  if (now > target) {
+    target = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 18, 23, 59, 59));
+  }
+
   const diff = target - now;
-  if (diff <= 0) return el.textContent = "Ended";
+
+  if (diff <= 0) {
+    el.textContent = "Ended";
+    return;
+  }
+
   const d = Math.floor(diff / (1000 * 60 * 60 * 24));
   const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
   const m = Math.floor((diff / (1000 * 60)) % 60);
   const s = Math.floor((diff / 1000) % 60);
+
   el.textContent = `${d}d ${h}h ${m}m ${s}s`;
 }
+
 setInterval(updateCountdown, 1000);
 updateCountdown();
+
 
 async function loadLeaderboard(apiURL = CURRENT_API_URL) {
   const res = await fetch(apiURL);
